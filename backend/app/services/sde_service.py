@@ -32,9 +32,9 @@ class SDEService:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT typeID, quantity
+            SELECT materialTypeID as typeID, quantity
             FROM industryActivityMaterials
-            WHERE blueprintTypeID = ? AND activityID = ?
+            WHERE typeID = ? AND activityID = ?
             """,
             (blueprint_type_id, activity_id),
         )
@@ -48,9 +48,9 @@ class SDEService:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT typeID, quantity
+            SELECT productTypeID as typeID, quantity
             FROM industryActivityProducts
-            WHERE blueprintTypeID = ? AND activityID = 1
+            WHERE typeID = ? AND activityID = 1
             """,
             (blueprint_type_id,),
         )
@@ -65,9 +65,9 @@ class SDEService:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT blueprintTypeID
+            SELECT typeID as blueprintTypeID
             FROM industryActivityProducts
-            WHERE typeID = ? AND activityID = 1
+            WHERE productTypeID = ? AND activityID = 1
             LIMIT 1
             """,
             (product_type_id,),
@@ -103,9 +103,16 @@ class SDEService:
             SELECT typeID, typeName, groupID
             FROM invTypes
             WHERE typeName LIKE ?
+            ORDER BY
+                CASE
+                    WHEN typeName = ? THEN 0
+                    WHEN typeName LIKE ? THEN 1
+                    ELSE 2
+                END,
+                typeName
             LIMIT ?
             """,
-            (f"%{name_query}%", limit),
+            (f"%{name_query}%", name_query, f"{name_query}%", limit),
         )
         return [dict(row) for row in cursor.fetchall()]
 
@@ -118,9 +125,9 @@ class SDEService:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT typeID, level
+            SELECT skillID as typeID, level
             FROM industryActivitySkills
-            WHERE blueprintTypeID = ? AND activityID = 1
+            WHERE typeID = ? AND activityID = 1
             """,
             (blueprint_type_id,),
         )
