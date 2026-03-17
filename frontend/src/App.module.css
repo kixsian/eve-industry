@@ -1,0 +1,44 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0d0d0d;
+  color: #e0e0e0;
+}
+
+.header {
+  background: linear-gradient(135deg, #1a3a52 0%, #0d1b2a 100%);
+  padding: 2rem;
+  border-bottom: 2px solid #00aaff;
+  box-shadow: 0 2px 8px rgba(0, 170, 255, 0.1);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: #00aaff;
+  text-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+}
+
+.header p {
+  margin: 0.5rem 0 0;
+  color: #aabbcc;
+  font-size: 0.9rem;
+}
+
+.main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.footer {
+  background: #1a1a1a;
+  padding: 1.5rem;
+  text-align: center;
+  border-top: 1px solid #333;
+  color: #888;
+  font-size: 0.9rem;
+}

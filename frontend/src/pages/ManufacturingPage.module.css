@@ -1,0 +1,119 @@
+.page {
+  width: 100%;
+}
+
+.container {
+  width: 100%;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  margin: 0 0 1.5rem 0;
+  color: #00aaff;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #333;
+  padding-bottom: 0.5rem;
+}
+
+.section h3 {
+  margin: 0 0 1rem 0;
+  color: #00aaff;
+  font-size: 1.1rem;
+}
+
+.selectedProduct {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #0d0d0d;
+  border: 1px solid #00aaff;
+  border-radius: 3px;
+  color: #e0e0e0;
+}
+
+.selected {
+  color: #aabbcc;
+}
+
+.selected strong {
+  color: #ffcc00;
+}
+
+.calculateButton {
+  padding: 0.75rem 2rem;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #00aaff 0%, #0088cc 100%);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 170, 255, 0.3);
+}
+
+.calculateButton:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(0, 170, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.calculateButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(136, 51, 51, 0.2);
+  border: 1px solid #883333;
+  border-radius: 3px;
+  color: #ff9999;
+}
+
+.flatMaterialsList {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table thead {
+  background: #0d0d0d;
+  border-bottom: 2px solid #00aaff;
+}
+
+.table th {
+  padding: 0.75rem;
+  text-align: left;
+  color: #00aaff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #222;
+  color: #e0e0e0;
+}
+
+.table tbody tr:hover {
+  background-color: #253040;
+}
+
+.number {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  color: #aabbcc;
+}

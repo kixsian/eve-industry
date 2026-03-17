@@ -1,0 +1,146 @@
+.configurator {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.configGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.configGroup label {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hint {
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.input {
+  padding: 0.5rem;
+  background: #0d0d0d;
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #e0e0e0;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #00aaff;
+  box-shadow: 0 0 4px rgba(0, 170, 255, 0.2);
+}
+
+.meSlider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slider {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #333 0%, #00aaff 100%);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00aaff;
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(0, 170, 255, 0.4);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00aaff;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 4px rgba(0, 170, 255, 0.4);
+}
+
+.meValue {
+  color: #00aaff;
+  font-weight: 600;
+  font-size: 1rem;
+  min-width: 30px;
+  text-align: right;
+}
+
+.toggleGroup {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #0d0d0d;
+  border: 1px solid #222;
+  border-radius: 3px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #e0e0e0;
+  user-select: none;
+}
+
+.checkbox {
+  margin-right: 0.75rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #00aaff;
+}
+
+.info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #0d0d0d;
+  border-left: 3px solid #00aaff;
+  border-radius: 3px;
+}
+
+.info p {
+  margin: 0 0 0.5rem 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.info code {
+  display: block;
+  background: #1a1a1a;
+  border: 1px solid #222;
+  border-radius: 3px;
+  padding: 0.75rem;
+  color: #00dd88;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
