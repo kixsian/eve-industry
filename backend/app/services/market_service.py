@@ -1,5 +1,5 @@
 """
-Market price service using Fuzzwork Market API.
+Market price service using CCP ESI API.
 """
 import httpx
 import asyncio
@@ -33,14 +33,25 @@ class PriceCache:
 
 class MarketService:
     """
-    Service for fetching market prices from Fuzzwork API.
-    Fuzzwork API: https://market.fuzzwork.co.uk/api/
-    Returns: {"typeID": {"buy": {"max": 100.0}, "sell": {"min": 105.0}}, ...}
+    Service for fetching market prices from CCP ESI API.
+    ESI API: https://esi.eveonline.com/latest/
+
+    Uses two strategies:
+    1. Bulk cache: all average prices from /markets/prices/ (1 hour TTL)
+    2. Jita orders: per-type sell orders from /markets/10000002/orders/ (30 min TTL)
     """
-    def __init__(self, api_url: str = None, cache_ttl_minutes: int = 30):
-        self.api_url = api_url or settings.fuzzwork_api_url
-        self.cache = PriceCache(ttl_minutes=cache_ttl_minutes)
+
+    JITA_REGION_ID = 10000002
+    JITA_STATION_ID = 60003760
+    BULK_CACHE_TTL = 60  # minutes
+    JITA_CACHE_TTL = 30  # minutes
+
+    def __init__(self, esi_url: str = None):
+        self.esi_url = esi_url or settings.eve_esi_url
+        self.per_type_cache = PriceCache(ttl_minutes=self.JITA_CACHE_TTL)
         self.client = None
+        self._bulk_cache: Dict[int, float] = {}
+        self._bulk_cache_time: Optional[datetime] = None
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self.client is None:
@@ -56,13 +67,19 @@ class MarketService:
         """
         Get prices for a list of type IDs.
         Returns dict of {type_id: sell_min_price}
-        Falls back to cached values if available.
+
+        Fetch flow:
+        1. Check per-type cache (Jita orders)
+        2. Fetch Jita sell orders concurrently for uncached types
+        3. Filter to Jita 4-4 station (location_id 60003760), take min price
+        4. Fall back to bulk average price if no Jita orders
+        5. Return cached/fetched prices
         """
         # Check cache first
         cached = {}
         to_fetch = []
         for type_id in type_ids:
-            cached_price = self.cache.get(type_id)
+            cached_price = self.per_type_cache.get(type_id)
             if cached_price is not None:
                 cached[type_id] = cached_price
             else:
@@ -71,68 +88,130 @@ class MarketService:
         if not to_fetch:
             return cached
 
-        # Fetch from API
-        fetched = await self._fetch_from_api(to_fetch)
-        self.cache.set_bulk(fetched)
+        # Fetch Jita orders concurrently for uncached types
+        fetched = await self._fetch_jita_prices(to_fetch)
+        self.per_type_cache.set_bulk(fetched)
 
         return {**cached, **fetched}
 
-    async def _fetch_from_api(self, type_ids: List[int]) -> Dict[int, float]:
+    async def _fetch_jita_prices(self, type_ids: List[int]) -> Dict[int, float]:
         """
-        Fetch prices from Fuzzwork API.
-        API endpoint: /types/prices/?typeid=123,456,789
+        Fetch prices from Jita orders on ESI.
+        For each type_id, queries /markets/{region_id}/orders/?type_id={id}&order_type=sell
+        Filters to Jita 4-4 station (location_id 60003760), takes minimum price.
+        Falls back to bulk average price if no Jita orders.
         """
         if not type_ids:
             return {}
 
+        # Fetch concurrently
+        tasks = [self._fetch_single_type_price(tid) for tid in type_ids]
+        prices = await asyncio.gather(*tasks, return_exceptions=True)
+
+        result = {}
+        for type_id, price in zip(type_ids, prices):
+            if isinstance(price, Exception):
+                # If exception occurred, try bulk cache fallback
+                bulk_price = await self._get_bulk_price(type_id)
+                result[type_id] = bulk_price or 0.0
+            elif price is not None:
+                result[type_id] = price
+            else:
+                # No Jita orders, try bulk cache
+                bulk_price = await self._get_bulk_price(type_id)
+                result[type_id] = bulk_price or 0.0
+
+        return result
+
+    async def _fetch_single_type_price(self, type_id: int) -> Optional[float]:
+        """
+        Fetch Jita sell orders for a single type.
+        Returns minimum sell price at Jita 4-4 station, or None if no orders.
+        """
         client = await self._get_client()
-        type_ids_str = ",".join(str(tid) for tid in type_ids)
 
         try:
-            url = f"{self.api_url}/types/prices/?typeid={type_ids_str}"
+            url = f"{self.esi_url}/markets/{self.JITA_REGION_ID}/orders/"
+            params = {
+                "type_id": type_id,
+                "order_type": "sell",
+            }
+            print(f"DEBUG: Fetching Jita orders for type {type_id} from {url}")
+            response = await client.get(url, params=params, timeout=10)
+            response.raise_for_status()
+
+            orders = response.json()
+            print(f"DEBUG: Got {len(orders)} orders for type {type_id}")
+
+            # Filter to Jita 4-4 station (location_id 60003760)
+            jita_orders = [
+                o for o in orders
+                if o.get("location_id") == self.JITA_STATION_ID
+            ]
+
+            if not jita_orders:
+                print(f"DEBUG: No Jita 4-4 orders for type {type_id}")
+                return None
+
+            # Return minimum sell price
+            min_price = min(o.get("price", float("inf")) for o in jita_orders)
+            print(f"DEBUG: Type {type_id} min Jita price: {min_price}")
+            return min_price
+
+        except httpx.HTTPError as e:
+            print(f"ERROR fetching Jita orders for type {type_id}: {e}")
+            return None
+        except Exception as e:
+            print(f"ERROR (unexpected) fetching Jita orders for type {type_id}: {e}")
+            return None
+
+    async def _get_bulk_price(self, type_id: int) -> Optional[float]:
+        """
+        Get bulk average price from ESI /markets/prices/ endpoint.
+        Caches all prices for 1 hour.
+        """
+        # Check if bulk cache is still valid
+        if self._bulk_cache_time and (datetime.now() - self._bulk_cache_time) < timedelta(minutes=self.BULK_CACHE_TTL):
+            price = self._bulk_cache.get(type_id)
+            print(f"DEBUG: Got cached bulk price for type {type_id}: {price}")
+            return price
+
+        # Fetch all prices
+        client = await self._get_client()
+        try:
+            url = f"{self.esi_url}/markets/prices/"
+            print(f"DEBUG: Fetching bulk prices from {url}")
             response = await client.get(url, timeout=10)
             response.raise_for_status()
 
-            data = response.json()
-            prices = {}
+            prices_data = response.json()
+            print(f"DEBUG: Got {len(prices_data)} bulk prices")
 
-            for type_id_str, type_data in data.items():
-                try:
-                    type_id = int(type_id_str)
-                    # Use sell.min (lowest sell price at Jita)
-                    sell_data = type_data.get("sell", {})
-                    min_price = sell_data.get("min")
-                    if min_price is not None:
-                        prices[type_id] = min_price
-                except (ValueError, KeyError):
-                    continue
+            # Parse response: list of {"type_id": X, "adjusted_price": Y, "average_price": Z}
+            self._bulk_cache = {}
+            for item in prices_data:
+                tid = item.get("type_id")
+                # Use average_price (actual market average)
+                price = item.get("average_price")
+                if tid and price:
+                    self._bulk_cache[tid] = price
 
-            return prices
+            self._bulk_cache_time = datetime.now()
+            bulk_price = self._bulk_cache.get(type_id)
+            print(f"DEBUG: Type {type_id} bulk price: {bulk_price}")
+            return bulk_price
 
         except httpx.HTTPError as e:
-            print(f"Error fetching prices from Fuzzwork: {e}")
-            return {}
+            print(f"ERROR fetching bulk prices: {e}")
+            return None
+        except Exception as e:
+            print(f"ERROR (unexpected) fetching bulk prices: {e}")
+            return None
 
     async def get_single_price(self, type_id: int) -> Optional[float]:
         """Get price for a single type."""
         prices = await self.get_prices([type_id])
         return prices.get(type_id)
-
-    async def search_prices(self, type_ids: List[int]) -> Dict[int, Dict]:
-        """
-        Get detailed price info (buy/sell, max/min).
-        """
-        client = await self._get_client()
-        type_ids_str = ",".join(str(tid) for tid in type_ids)
-
-        try:
-            url = f"{self.api_url}/types/prices/?typeid={type_ids_str}"
-            response = await client.get(url, timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPError as e:
-            print(f"Error fetching detailed prices: {e}")
-            return {}
 
 
 # Singleton
