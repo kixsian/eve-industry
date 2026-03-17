@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose up:*)",
+      "Bash(docker compose:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(ls -la backend/*.py)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(curl -s \"https://market.fuzzwork.co.uk/api/types/prices/?typeid=34,35,36,37\")",
+      "Bash(curl -v \"https://market.fuzzwork.co.uk/api/types/prices/?typeid=34\")",
+      "WebSearch",
+      "WebFetch(domain:market.fuzzwork.co.uk)",
+      "WebFetch(domain:janice.e-351.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"https://market.fuzzwork.co.uk/api/marketstat\")",
+      "Bash(curl -s \"https://esi.evetech.net/latest/markets/prices/\")",
+      "Bash(curl -s \"https://esi.evetech.net/latest/markets/10000002/orders/?datasource=tranquility&order_type=sell&page=1\")",
+      "Bash(python:*)",
+      "Bash(curl -s \"https://esi.eveonline.com/latest/markets/prices/\")",
+      "Bash(curl -s -i \"https://esi.eveonline.com/latest/markets/prices/\")",
+      "Bash(timeout 5 curl -s \"https://esi.eveonline.com/latest/markets/10000002/orders/?type_id=34&order_type=sell\")",
+      "Bash(docker exec:*)",
+      "Bash(docker network:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git config:*)",
+      "Bash(git format-patch:*)"
+    ]
+  }
+}
