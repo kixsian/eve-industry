@@ -278,13 +278,13 @@ class ManufacturingEngine:
             build_intermediates=build_intermediates,
         )
 
-        # Apply prices
+        # Apply prices and owned quantities to the full tree
         self.apply_prices(tree, prices)
+        if owned:
+            self.apply_owned(tree, owned)
 
-        # Flatten for shopping list
+        # Flatten for shopping list and re-apply owned (lost during flattening)
         flat = self.flatten_materials(tree)
-
-        # Apply owned quantities to flat materials (quantity_owned is lost in flattening)
         if owned:
             for node in flat.values():
                 node.quantity_owned = min(owned.get(node.type_id, 0), node.quantity_needed)
