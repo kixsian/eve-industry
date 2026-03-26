@@ -58,8 +58,8 @@ function MaterialTable({ materials, title, subtitle, totalCost }: MaterialTableP
                   )}
                   <td className={styles.buyQty}>{formatQty(m.quantity_to_buy)}</td>
                   <td className={styles.number}>{formatISK(m.unit_price)}</td>
-                  <td className={fullyOwned ? styles.zeroCost : styles.costCell}>
-                    {fullyOwned ? '✓ Have it' : formatISK(m.total_cost)}
+                  <td className={styles.costCell}>
+                    {formatISK(m.total_cost)}
                   </td>
                 </tr>
               )

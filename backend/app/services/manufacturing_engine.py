@@ -33,13 +33,11 @@ class MaterialNode:
 
     @property
     def total_cost(self) -> float:
-        """Cost of materials for this node (excluding children if they're built)."""
+        """Full cost of materials for this node (based on quantity needed, not to-buy)."""
         if self.children:
-            # If we have children, only sum children's costs (they're being built)
             return sum(child.total_cost for child in self.children)
         else:
-            # Leaf node: cost is what we need to buy
-            return self.quantity_to_buy * self.unit_price
+            return self.quantity_needed * self.unit_price
 
     def to_dict(self) -> Dict:
         """Convert to dict for API response."""
@@ -306,12 +304,9 @@ class ManufacturingEngine:
             # Manually set quantity_to_buy since it's a property
             direct_components[-1].quantity_owned = child_owned
 
-        # Calculate costs
-        total_cost = sum(node.quantity_to_buy * node.unit_price for node in flat.values())
-        component_buy_cost = sum(
-            max(0.0, c.quantity_needed - c.quantity_owned) * c.unit_price
-            for c in direct_components
-        )
+        # Calculate costs based on full quantity needed (ignoring owned stock)
+        total_cost = sum(node.quantity_needed * node.unit_price for node in flat.values())
+        component_buy_cost = sum(c.quantity_needed * c.unit_price for c in direct_components)
         total_sell_price = tree.unit_price * (runs * self._get_output_per_run(product_type_id))
 
         product_info = self.sde.get_type_info(product_type_id)
