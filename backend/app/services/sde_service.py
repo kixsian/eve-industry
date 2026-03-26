@@ -92,6 +92,19 @@ class SDEService:
         row = cursor.fetchone()
         return dict(row) if row else None
 
+    def get_type_names(self, type_ids: List[int]) -> Dict[int, str]:
+        """Bulk lookup of type names. Returns {type_id: type_name}."""
+        if not type_ids:
+            return {}
+        conn = self._get_connection()
+        placeholders = ",".join("?" * len(type_ids))
+        cursor = conn.cursor()
+        cursor.execute(
+            f"SELECT typeID, typeName FROM invTypes WHERE typeID IN ({placeholders})",
+            type_ids,
+        )
+        return {row["typeID"]: row["typeName"] for row in cursor.fetchall()}
+
     def search_types(self, name_query: str, limit: int = 50) -> List[Dict]:
         """
         Search for types by name (case-insensitive).

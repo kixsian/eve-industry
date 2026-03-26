@@ -76,7 +76,9 @@ export interface IndustryJob {
   job_id: number
   activity_id: number
   blueprint_type_id: number
+  blueprint_name: string
   product_type_id: number
+  product_name?: string
   runs: number
   status: string
   start_date: string
@@ -93,5 +95,6 @@ export const authApi = {
 export const characterApi = {
   wallet: () => authBase.get<{ balance: number }>('/api/character/wallet'),
   skills: () => authBase.get<CharacterSkills>('/api/character/skills'),
-  jobs: () => authBase.get<IndustryJob[]>('/api/character/jobs'),
+  jobs: () => authBase.get<IndustryJob[]>('/api/character/corporation/jobs'),
+  assets: () => authBase.get<any[]>('/api/character/corporation/assets'),
 }

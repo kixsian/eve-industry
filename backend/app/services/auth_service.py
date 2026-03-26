@@ -17,9 +17,11 @@ EVE_SSO_TOKEN_URL = "https://login.eveonline.com/v2/oauth/token"
 
 SCOPES = [
     "esi-assets.read_assets.v1",
+    "esi-assets.read_corporation_assets.v1",
     "esi-skills.read_skills.v1",
     "esi-wallet.read_character_wallet.v1",
     "esi-industry.read_character_jobs.v1",
+    "esi-industry.read_corporation_jobs.v1",
 ]
 
 DB_PATH = Path(__file__).parent.parent.parent / "sde" / "auth.db"
