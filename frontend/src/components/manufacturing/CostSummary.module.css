@@ -117,6 +117,13 @@
   font-family: 'Courier New', monospace;
 }
 
+.markupProfit {
+  color: #00cc66;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  font-family: 'Courier New', monospace;
+}
+
 .empty {
   padding: 2rem;
   text-align: center;
