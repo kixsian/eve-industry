@@ -58,7 +58,7 @@ export const manufacturingApi = {
 }
 
 // Auth is on the root, not /api
-const authBase = axios.create({ baseURL: import.meta.env.VITE_API_BASE?.replace('/api', '') || 'http://localhost:8000' })
+const authBase = axios.create({ baseURL: (import.meta.env.VITE_API_BASE || 'http://localhost:8000/api').replace('/api', '') })
 
 export interface AuthStatus {
   authenticated: boolean

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import RedirectResponse
 from ..services import auth_service
+from ..config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -29,7 +30,7 @@ async def callback(code: str, state: str):
             expires_in=tokens["expires_in"],
         )
 
-        return RedirectResponse("http://localhost:5173?logged_in=true")
+        return RedirectResponse(f"{settings.eve_frontend_url}?logged_in=true")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Auth error: {str(e)}")
 
