@@ -1,18 +1,14 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import init_db, close_db
-from .config import settings
-from .routers import manufacturing
+from .routers import manufacturing, auth, character
+from .services.auth_service import init_auth_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    await init_db()
+    init_auth_db()
     yield
-    # Shutdown
-    await close_db()
 
 
 app = FastAPI(
@@ -22,7 +18,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173"],
@@ -31,8 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(manufacturing.router, prefix="/api")
+app.include_router(auth.router)
+app.include_router(character.router)
 
 
 @app.get("/health")
