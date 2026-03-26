@@ -74,46 +74,134 @@
   color: #ff9999;
 }
 
-.flatMaterialsList {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 4px;
-  padding: 1.5rem;
+/* Two-column material frames */
+.materialsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .materialsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.materialFrame {
+  background: #111;
+  border: 1px solid #1e2a35;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.frameHeader {
+  padding: 1rem 1.25rem;
+  background: #0d1b2a;
+  border-bottom: 1px solid #1e2a35;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.frameTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #00aaff;
+  margin: 0;
+}
+
+.frameSubtitle {
+  font-size: 0.8rem;
+  color: #667788;
+}
+
+.frameBody {
+  overflow-x: auto;
+  flex: 1;
+}
+
+.frameFooter {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #1e2a35;
+  background: #0d1b2a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerLabel {
+  font-size: 0.85rem;
+  color: #aabbcc;
+}
+
+.footerCost {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffcc00;
+  font-variant-numeric: tabular-nums;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.table thead {
-  background: #0d0d0d;
-  border-bottom: 2px solid #00aaff;
+  font-size: 0.88rem;
 }
 
 .table th {
-  padding: 0.75rem;
+  padding: 0.6rem 1rem;
   text-align: left;
   color: #00aaff;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
+  border-bottom: 1px solid #1e2a35;
+  white-space: nowrap;
 }
 
 .table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #222;
-  color: #e0e0e0;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid #1a1a1a;
+  color: #ccc;
 }
 
-.table tbody tr:hover {
-  background-color: #253040;
+.table tbody tr:hover td {
+  background: #1a2530;
+}
+
+.table tbody tr.owned td {
+  background: #0d1f0d;
+}
+
+.table tbody tr.owned:hover td {
+  background: #132613;
 }
 
 .number {
   text-align: right;
-  font-family: 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
   color: #aabbcc;
+}
+
+.ownedQty {
+  color: #00cc66;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.buyQty {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.costCell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #ffcc00;
+}
+
+.zeroCost {
+  color: #00cc66;
 }

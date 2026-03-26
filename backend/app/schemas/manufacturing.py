@@ -12,7 +12,8 @@ class ManufacturingRequest(BaseModel):
 
 
 class CostSummary(BaseModel):
-    material_cost: float
+    material_cost: float       # Cost buying all raw materials
+    component_buy_cost: float  # Cost buying direct components off market
     install_cost: float
     total_cost: float
     jita_sell_price: float
@@ -45,4 +46,5 @@ class ManufacturingResponse(BaseModel):
     me_level: int
     material_tree: MaterialTreeNode
     flat_materials: List[MaterialTreeNode]
+    direct_components: List[MaterialTreeNode]
     cost_summary: CostSummary

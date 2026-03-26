@@ -74,8 +74,10 @@ async def calculate_manufacturing(request: ManufacturingRequest):
 
         response_tree = _convert_node_to_response(result["materialTree"])
         response_flat = [_convert_node_to_response(n) for n in result["flatMaterials"]]
+        response_components = [_convert_node_to_response(n) for n in result["directComponents"]]
         cost_summary = {
             "material_cost": result["costSummary"]["materialCost"],
+            "component_buy_cost": result["costSummary"]["componentBuyCost"],
             "install_cost": result["costSummary"]["installCost"],
             "total_cost": result["costSummary"]["totalCost"],
             "jita_sell_price": result["costSummary"]["jitaSellPrice"],
@@ -89,6 +91,7 @@ async def calculate_manufacturing(request: ManufacturingRequest):
             me_level=result["meLevel"],
             material_tree=response_tree,
             flat_materials=response_flat,
+            direct_components=response_components,
             cost_summary=cost_summary,
         )
 

@@ -289,8 +289,29 @@ class ManufacturingEngine:
             for node in flat.values():
                 node.quantity_owned = min(owned.get(node.type_id, 0), node.quantity_needed)
 
+        # Build direct components list (first-level blueprint materials, bought off market)
+        direct_components = []
+        for child in tree.children:
+            child_owned = min(owned.get(child.type_id, 0), child.quantity_needed)
+            child_to_buy = max(0.0, child.quantity_needed - child_owned)
+            direct_components.append(MaterialNode(
+                type_id=child.type_id,
+                type_name=child.type_name,
+                quantity_needed=child.quantity_needed,
+                quantity_owned=child_owned,
+                unit_price=child.unit_price,
+                is_buildable=child.is_buildable,
+                me_level=child.me_level,
+            ))
+            # Manually set quantity_to_buy since it's a property
+            direct_components[-1].quantity_owned = child_owned
+
         # Calculate costs
         total_cost = sum(node.quantity_to_buy * node.unit_price for node in flat.values())
+        component_buy_cost = sum(
+            max(0.0, c.quantity_needed - c.quantity_owned) * c.unit_price
+            for c in direct_components
+        )
         total_sell_price = tree.unit_price * (runs * self._get_output_per_run(product_type_id))
 
         product_info = self.sde.get_type_info(product_type_id)
@@ -308,9 +329,14 @@ class ManufacturingEngine:
                 [node.to_dict() for node in flat.values()],
                 key=lambda x: x["typeName"],
             ),
+            "directComponents": sorted(
+                [c.to_dict() for c in direct_components],
+                key=lambda x: x["typeName"],
+            ),
             "costSummary": {
                 "materialCost": total_cost,
-                "installCost": 0.0,  # TODO: add install cost from ESI
+                "componentBuyCost": component_buy_cost,
+                "installCost": 0.0,
                 "totalCost": total_cost,
                 "jitaSellPrice": total_sell_price,
                 "margin": total_sell_price - total_cost,

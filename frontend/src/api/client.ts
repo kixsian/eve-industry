@@ -20,6 +20,7 @@ export interface ManufacturingRequest {
 
 export interface CostSummary {
   material_cost: number
+  component_buy_cost: number
   install_cost: number
   total_cost: number
   jita_sell_price: number
@@ -46,6 +47,7 @@ export interface ManufacturingResponse {
   me_level: number
   material_tree: MaterialNode
   flat_materials: MaterialNode[]
+  direct_components: MaterialNode[]
   cost_summary: CostSummary
 }
 
