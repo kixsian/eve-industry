@@ -42,6 +42,35 @@ async def _esi_get(path: str):
         return response.json()
 
 
+async def _esi_get_all_pages(path: str) -> List[dict]:
+    """Fetch all pages of a paginated ESI endpoint."""
+    token = await get_valid_token()
+    if not token:
+        raise ValueError("Not authenticated")
+
+    all_items = []
+    page = 1
+    async with httpx.AsyncClient() as client:
+        while True:
+            sep = "&" if "?" in path else "?"
+            response = await client.get(
+                f"{ESI_BASE}{path}{sep}page={page}",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=15,
+            )
+            response.raise_for_status()
+            data = response.json()
+            if not data:
+                break
+            all_items.extend(data)
+            total_pages = int(response.headers.get("X-Pages", 1))
+            if page >= total_pages:
+                break
+            page += 1
+
+    return all_items
+
+
 def _require_character() -> dict:
     char = get_current_character()
     if not char:
@@ -102,7 +131,7 @@ async def get_corporation_jobs() -> List[dict]:
 
 async def get_corporation_assets() -> List[dict]:
     corp_id = await get_corporation_id()
-    return await _esi_get(f"/corporations/{corp_id}/assets/")
+    return await _esi_get_all_pages(f"/corporations/{corp_id}/assets/")
 
 
 async def get_corp_asset_quantities() -> Dict[int, int]:
