@@ -54,7 +54,7 @@ export default function IndustryJobs() {
           {jobs.map(job => (
             <tr key={job.job_id}>
               <td className={styles.activity}>{ACTIVITY_LABELS[job.activity_id] ?? `Activity ${job.activity_id}`}</td>
-              <td>{job.blueprint_name}</td>
+              <td>{job.activity_id === 1 && job.product_name ? job.product_name : job.blueprint_name}</td>
               <td>{job.runs}</td>
               <td>
                 <span className={`${styles.status} ${styles[job.status] ?? ''}`}>
