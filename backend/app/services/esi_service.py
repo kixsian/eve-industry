@@ -5,7 +5,7 @@ import httpx
 from typing import List
 from .auth_service import get_valid_token, get_current_character
 
-ESI_BASE = "https://esi.eveonline.com/latest"
+ESI_BASE = "https://esi.evetech.net/latest"
 
 # Industry-relevant skill IDs
 INDUSTRY_SKILL_IDS = {

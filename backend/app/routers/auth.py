@@ -20,7 +20,7 @@ async def callback(code: str, state: str):
 
     try:
         tokens = await auth_service.exchange_code(code)
-        char_info = await auth_service.verify_token(tokens["access_token"])
+        char_info = auth_service.decode_token(tokens["access_token"])
 
         auth_service.save_character(
             character_id=char_info["CharacterID"],

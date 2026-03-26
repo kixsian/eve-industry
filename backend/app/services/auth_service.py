@@ -14,7 +14,6 @@ from ..config import settings
 
 EVE_SSO_AUTH_URL = "https://login.eveonline.com/v2/oauth/authorize"
 EVE_SSO_TOKEN_URL = "https://login.eveonline.com/v2/oauth/token"
-EVE_VERIFY_URL = "https://esi.eveonline.com/verify/"
 
 SCOPES = [
     "esi-assets.read_assets.v1",
@@ -81,15 +80,18 @@ async def exchange_code(code: str) -> dict:
         return response.json()
 
 
-async def verify_token(access_token: str) -> dict:
-    """Call ESI verify to get character info from an access token."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            EVE_VERIFY_URL,
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        response.raise_for_status()
-        return response.json()
+def decode_token(access_token: str) -> dict:
+    """Decode the EVE SSO JWT to extract character info without a network call."""
+    import base64, json
+    # JWT is header.payload.signature — decode payload (no verification needed for local use)
+    payload_b64 = access_token.split(".")[1]
+    # Pad to multiple of 4
+    payload_b64 += "=" * (-len(payload_b64) % 4)
+    payload = json.loads(base64.urlsafe_b64decode(payload_b64))
+    # sub is "CHARACTER:EVE:123456"
+    character_id = int(payload["sub"].split(":")[-1])
+    character_name = payload.get("name", "")
+    return {"CharacterID": character_id, "CharacterName": character_name}
 
 
 async def refresh_access_token(refresh_token: str) -> dict:
