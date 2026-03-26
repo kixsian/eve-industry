@@ -1,0 +1,77 @@
+.container {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #00aaff44;
+  color: #00aaff;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #222;
+  color: #ccc;
+}
+
+.table tbody tr:hover td {
+  background: #1a2530;
+}
+
+.activity {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.blueprintId {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  background: #1a3a2a;
+  color: #00cc66;
+  border: 1px solid #00cc6644;
+}
+
+.status.delivered {
+  background: #1a1a2a;
+  color: #888;
+  border-color: #33333388;
+}
+
+.time {
+  color: #aabbcc;
+  font-variant-numeric: tabular-nums;
+}
+
+.cost {
+  color: #ffcc00;
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  color: #666;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+.error {
+  color: #ff6666;
+  padding: 1rem 0;
+}

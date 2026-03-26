@@ -8,22 +8,24 @@
 
 .header {
   background: linear-gradient(135deg, #1a3a52 0%, #0d1b2a 100%);
-  padding: 2rem;
+  padding: 1.25rem 2rem;
   border-bottom: 2px solid #00aaff;
   box-shadow: 0 2px 8px rgba(0, 170, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.header h1 {
+.headerLeft h1 {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   color: #00aaff;
   text-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
 }
 
-.header p {
-  margin: 0.5rem 0 0;
-  color: #aabbcc;
-  font-size: 0.9rem;
+.headerRight {
+  display: flex;
+  align-items: center;
 }
 
 .main {
@@ -32,6 +34,22 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
+}
+
+.jobsSection {
+  margin-top: 2.5rem;
+  background: #111;
+  border: 1px solid #1e2a35;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.sectionTitle {
+  margin: 0 0 1.25rem;
+  font-size: 1.1rem;
+  color: #00aaff;
+  font-weight: 600;
 }
 
 .footer {

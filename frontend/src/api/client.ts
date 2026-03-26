@@ -56,3 +56,42 @@ export const manufacturingApi = {
   search: (q: string, limit?: number) =>
     api.get('/manufacturing/search', { params: { q, limit } }),
 }
+
+// Auth is on the root, not /api
+const authBase = axios.create({ baseURL: import.meta.env.VITE_API_BASE?.replace('/api', '') || 'http://localhost:8000' })
+
+export interface AuthStatus {
+  authenticated: boolean
+  character_id?: number
+  character_name?: string
+  portrait?: string
+}
+
+export interface CharacterSkills {
+  total_sp: number
+  industry_skills: Record<string, number>
+}
+
+export interface IndustryJob {
+  job_id: number
+  activity_id: number
+  blueprint_type_id: number
+  product_type_id: number
+  runs: number
+  status: string
+  start_date: string
+  end_date: string
+  cost: number
+}
+
+export const authApi = {
+  status: () => authBase.get<AuthStatus>('/auth/status'),
+  logout: () => authBase.get('/auth/logout'),
+  loginUrl: 'http://localhost:8000/auth/login',
+}
+
+export const characterApi = {
+  wallet: () => authBase.get<{ balance: number }>('/api/character/wallet'),
+  skills: () => authBase.get<CharacterSkills>('/api/character/skills'),
+  jobs: () => authBase.get<IndustryJob[]>('/api/character/jobs'),
+}
