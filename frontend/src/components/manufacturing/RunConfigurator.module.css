@@ -95,6 +95,52 @@
   text-align: right;
 }
 
+.systemSearch {
+  position: relative;
+}
+
+.inputSelected {
+  border-color: #00aaff44;
+  color: #00aaff;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid #00aaff44;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #222;
+}
+
+.dropdownItem:hover {
+  background: #253040;
+}
+
+.systemName {
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.secStatus {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .toggleGroup {
   margin: 1rem 0;
   padding: 1rem;

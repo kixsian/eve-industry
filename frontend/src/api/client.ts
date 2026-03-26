@@ -16,6 +16,8 @@ export interface ManufacturingRequest {
   structure_bonus?: number
   rig_bonus?: number
   build_intermediates?: boolean
+  solar_system_id?: number
+  facility_tax_rate?: number
 }
 
 export interface CostSummary {
@@ -57,6 +59,11 @@ export const manufacturingApi = {
 
   search: (q: string, limit?: number) =>
     api.get('/manufacturing/search', { params: { q, limit } }),
+
+  searchSystems: (q: string) =>
+    api.get<{ results: { solarSystemID: number; solarSystemName: string; security: number }[] }>(
+      '/manufacturing/systems', { params: { q } }
+    ),
 }
 
 // Auth is on the root, not /api

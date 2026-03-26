@@ -82,6 +82,9 @@ export default function ManufacturingPage() {
   const [structureBonus, setStructureBonus] = useState(0.01)
   const [rigBonus, setRigBonus] = useState(0.02)
   const [buildIntermediates, setBuildIntermediates] = useState(true)
+  const [solarSystemId, setSolarSystemId] = useState<number | null>(null)
+  const [solarSystemName, setSolarSystemName] = useState('')
+  const [facilityTaxRate, setFacilityTaxRate] = useState(0.0)
   const [result, setResult] = useState<ManufacturingResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -98,6 +101,8 @@ export default function ManufacturingPage() {
         structure_bonus: structureBonus,
         rig_bonus: rigBonus,
         build_intermediates: buildIntermediates,
+        solar_system_id: solarSystemId ?? undefined,
+        facility_tax_rate: facilityTaxRate,
       })
       setResult(response.data)
     } catch (err: any) {
@@ -128,9 +133,13 @@ export default function ManufacturingPage() {
           <RunConfigurator
             runs={runs} meLevel={meLevel} structureBonus={structureBonus}
             rigBonus={rigBonus} buildIntermediates={buildIntermediates}
+            solarSystemId={solarSystemId} solarSystemName={solarSystemName}
+            facilityTaxRate={facilityTaxRate}
             onRunsChange={setRuns} onMeLevelChange={setMeLevel}
             onStructureBonusChange={setStructureBonus} onRigBonusChange={setRigBonus}
             onBuildIntermediatesChange={setBuildIntermediates}
+            onSystemChange={(id, name) => { setSolarSystemId(id); setSolarSystemName(name) }}
+            onFacilityTaxRateChange={setFacilityTaxRate}
           />
           <button className={styles.calculateButton} onClick={handleCalculate} disabled={!selectedProduct || loading}>
             {loading ? 'Calculating...' : 'Calculate Costs'}

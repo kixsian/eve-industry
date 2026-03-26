@@ -92,6 +92,26 @@ class SDEService:
         row = cursor.fetchone()
         return dict(row) if row else None
 
+    def search_systems(self, name_query: str, limit: int = 20) -> List[Dict]:
+        """Search solar systems by name."""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT solarSystemID, solarSystemName, security
+            FROM mapSolarSystems
+            WHERE solarSystemName LIKE ?
+            ORDER BY
+                CASE WHEN solarSystemName = ? THEN 0
+                     WHEN solarSystemName LIKE ? THEN 1
+                     ELSE 2 END,
+                solarSystemName
+            LIMIT ?
+            """,
+            (f"%{name_query}%", name_query, f"{name_query}%", limit),
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
     def get_type_names(self, type_ids: List[int]) -> Dict[int, str]:
         """Bulk lookup of type names. Returns {type_id: type_name}."""
         if not type_ids:

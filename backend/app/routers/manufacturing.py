@@ -4,7 +4,7 @@ from ..services.manufacturing_engine import ManufacturingEngine
 from ..services.market_service import get_market_service
 from ..services.sde_service import get_sde_service
 from ..services.auth_service import get_current_character
-from ..services import esi_service
+from ..services import esi_service, industry_service
 
 router = APIRouter(prefix="/manufacturing", tags=["manufacturing"])
 
@@ -48,12 +48,22 @@ async def calculate_manufacturing(request: ManufacturingRequest):
             try:
                 owned = await esi_service.get_corp_asset_quantities()
             except Exception:
-                pass  # Not authenticated or no corp access — skip
+                pass
 
-        # Run full calculation with prices and owned quantities
+        # Fetch adjusted prices and system cost index for install cost
+        adjusted_prices = {}
+        system_cost_index = 0.0
+        try:
+            adjusted_prices = await industry_service.get_adjusted_prices()
+            if request.solar_system_id:
+                system_cost_index = await industry_service.get_system_cost_index(request.solar_system_id)
+        except Exception:
+            pass
+
+        # Run full calculation
         result = engine.calculate_manufacturing(
             request.product_type_id,
-            1.0,  # quantity
+            1.0,
             request.runs,
             me_level=request.me_level,
             structure_bonus=request.structure_bonus,
@@ -61,6 +71,9 @@ async def calculate_manufacturing(request: ManufacturingRequest):
             build_intermediates=request.build_intermediates,
             prices=prices,
             owned=owned,
+            adjusted_prices=adjusted_prices,
+            system_cost_index=system_cost_index,
+            facility_tax_rate=request.facility_tax_rate,
         )
 
         # Convert to response format (convert camelCase dict keys)
@@ -99,6 +112,16 @@ async def calculate_manufacturing(request: ManufacturingRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Calculation error: {str(e)}")
+
+
+@router.get("/systems")
+async def search_systems(q: str):
+    """Search solar systems by name."""
+    try:
+        sde = get_sde_service()
+        return {"results": sde.search_systems(q)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search")

@@ -21,29 +21,32 @@ export const CostSummary: React.FC<CostSummaryProps> = ({ summary, productName }
     return <div className={styles.empty}>No cost data available</div>
   }
 
-  const base = summary.material_cost
+  const totalBuildCost = summary.material_cost + summary.install_cost
 
   return (
     <div className={styles.summaryContainer}>
       <div className={styles.summaryGrid}>
         <div className={styles.summaryCard}>
-          <label>Build Cost (Raw)</label>
-          <div className={styles.value}>
-            {formatISK(summary.material_cost)} ISK
-          </div>
+          <label>Raw Materials</label>
+          <div className={styles.value}>{formatISK(summary.material_cost)} ISK</div>
         </div>
 
         <div className={styles.summaryCard}>
-          <label>Build Cost (Components)</label>
-          <div className={styles.value}>
-            {formatISK(summary.component_buy_cost)} ISK
-          </div>
+          <label>Buy Components</label>
+          <div className={styles.value}>{formatISK(summary.component_buy_cost)} ISK</div>
         </div>
 
         <div className={styles.summaryCard}>
           <label>Install Cost</label>
           <div className={styles.value}>
-            {formatISK(summary.install_cost)} ISK
+            {summary.install_cost > 0 ? formatISK(summary.install_cost) + ' ISK' : '— no system set'}
+          </div>
+        </div>
+
+        <div className={styles.summaryCard}>
+          <label>Total (Raw + Install)</label>
+          <div className={`${styles.value} ${styles.totalCost}`}>
+            {formatISK(totalBuildCost)} ISK
           </div>
         </div>
       </div>
@@ -52,8 +55,8 @@ export const CostSummary: React.FC<CostSummaryProps> = ({ summary, productName }
         <h4>Profit Calculator — {productName}</h4>
         <div className={styles.markupGrid}>
           {MARKUPS.map(pct => {
-            const sellPrice = base * (1 + pct / 100)
-            const profit = sellPrice - base
+            const sellPrice = totalBuildCost * (1 + pct / 100)
+            const profit = sellPrice - totalBuildCost
             return (
               <div key={pct} className={styles.markupOption}>
                 <div className={styles.markupLabel}>+{pct}% markup</div>

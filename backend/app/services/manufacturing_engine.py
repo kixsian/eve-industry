@@ -258,12 +258,16 @@ class ManufacturingEngine:
         build_intermediates: bool = True,
         prices: Dict[int, float] = None,
         owned: Dict[int, int] = None,
+        adjusted_prices: Dict[int, float] = None,
+        system_cost_index: float = 0.0,
+        facility_tax_rate: float = 0.0,
     ) -> Dict:
         """
         Full manufacturing calculation.
         """
         prices = prices or {}
         owned = owned or {}
+        adjusted_prices = adjusted_prices or {}
 
         # Build tree
         tree = self.build_material_tree(
@@ -307,6 +311,14 @@ class ManufacturingEngine:
         # Calculate costs based on full quantity needed (ignoring owned stock)
         total_cost = sum(node.quantity_needed * node.unit_price for node in flat.values())
         component_buy_cost = sum(c.quantity_needed * c.unit_price for c in direct_components)
+
+        # Install cost = EIV × system cost index × (1 + facility tax)
+        # EIV uses CCP's adjusted prices for input materials
+        eiv = sum(
+            adjusted_prices.get(node.type_id, 0.0) * node.quantity_needed
+            for node in flat.values()
+        )
+        install_cost = eiv * system_cost_index * (1 + facility_tax_rate)
         total_sell_price = tree.unit_price * (runs * self._get_output_per_run(product_type_id))
 
         product_info = self.sde.get_type_info(product_type_id)
@@ -331,7 +343,7 @@ class ManufacturingEngine:
             "costSummary": {
                 "materialCost": total_cost,
                 "componentBuyCost": component_buy_cost,
-                "installCost": 0.0,
+                "installCost": install_cost,
                 "totalCost": total_cost,
                 "jitaSellPrice": total_sell_price,
                 "margin": total_sell_price - total_cost,

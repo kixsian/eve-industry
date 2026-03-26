@@ -9,6 +9,8 @@ class ManufacturingRequest(BaseModel):
     structure_bonus: float = 0.01
     rig_bonus: float = 0.02
     build_intermediates: bool = True
+    solar_system_id: Optional[int] = None
+    facility_tax_rate: float = 0.0
 
 
 class CostSummary(BaseModel):
