@@ -238,6 +238,17 @@ class ManufacturingEngine:
         for child in node.children:
             self.apply_prices(child, prices)
 
+    def apply_owned(
+        self, node: MaterialNode, owned: Dict[int, int]
+    ) -> None:
+        """
+        Recursively apply owned quantities from corp assets to the tree.
+        Owned stock reduces quantity_to_buy, which reduces total cost.
+        """
+        node.quantity_owned = min(owned.get(node.type_id, 0), node.quantity_needed)
+        for child in node.children:
+            self.apply_owned(child, owned)
+
     def calculate_manufacturing(
         self,
         product_type_id: int,
@@ -248,11 +259,13 @@ class ManufacturingEngine:
         rig_bonus: float = 0.02,
         build_intermediates: bool = True,
         prices: Dict[int, float] = None,
+        owned: Dict[int, int] = None,
     ) -> Dict:
         """
         Full manufacturing calculation.
         """
         prices = prices or {}
+        owned = owned or {}
 
         # Build tree
         tree = self.build_material_tree(
@@ -270,6 +283,11 @@ class ManufacturingEngine:
 
         # Flatten for shopping list
         flat = self.flatten_materials(tree)
+
+        # Apply owned quantities to flat materials (quantity_owned is lost in flattening)
+        if owned:
+            for node in flat.values():
+                node.quantity_owned = min(owned.get(node.type_id, 0), node.quantity_needed)
 
         # Calculate costs
         total_cost = sum(node.quantity_to_buy * node.unit_price for node in flat.values())

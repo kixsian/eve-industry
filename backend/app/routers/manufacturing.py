@@ -3,6 +3,8 @@ from ..schemas.manufacturing import ManufacturingRequest, ManufacturingResponse
 from ..services.manufacturing_engine import ManufacturingEngine
 from ..services.market_service import get_market_service
 from ..services.sde_service import get_sde_service
+from ..services.auth_service import get_current_character
+from ..services import esi_service
 
 router = APIRouter(prefix="/manufacturing", tags=["manufacturing"])
 
@@ -40,7 +42,15 @@ async def calculate_manufacturing(request: ManufacturingRequest):
         # Fetch prices
         prices = await market.get_prices(type_ids)
 
-        # Run full calculation with prices
+        # Fetch corp assets if authenticated
+        owned = {}
+        if get_current_character():
+            try:
+                owned = await esi_service.get_corp_asset_quantities()
+            except Exception:
+                pass  # Not authenticated or no corp access — skip
+
+        # Run full calculation with prices and owned quantities
         result = engine.calculate_manufacturing(
             request.product_type_id,
             1.0,  # quantity
@@ -50,6 +60,7 @@ async def calculate_manufacturing(request: ManufacturingRequest):
             rig_bonus=request.rig_bonus,
             build_intermediates=request.build_intermediates,
             prices=prices,
+            owned=owned,
         )
 
         # Convert to response format (convert camelCase dict keys)

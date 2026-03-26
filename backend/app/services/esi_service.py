@@ -2,8 +2,13 @@
 ESI API service. Fetches character data using stored tokens.
 """
 import httpx
-from typing import List
+import time
+from typing import List, Dict, Optional
 from .auth_service import get_valid_token, get_current_character
+
+# Simple in-memory asset cache {type_id: quantity}, expires after 5 minutes
+_asset_cache: Optional[Dict[int, int]] = None
+_asset_cache_expiry: float = 0
 
 ESI_BASE = "https://esi.evetech.net/latest"
 
@@ -82,3 +87,40 @@ async def get_industry_jobs() -> List[dict]:
 async def get_assets() -> List[dict]:
     char = _require_character()
     return await _esi_get(f"/characters/{char['character_id']}/assets/")
+
+
+async def get_corporation_id() -> int:
+    char = _require_character()
+    data = await _esi_get(f"/characters/{char['character_id']}/")
+    return data["corporation_id"]
+
+
+async def get_corporation_jobs() -> List[dict]:
+    corp_id = await get_corporation_id()
+    return await _esi_get(f"/corporations/{corp_id}/industry/jobs/?include_completed=false")
+
+
+async def get_corporation_assets() -> List[dict]:
+    corp_id = await get_corporation_id()
+    return await _esi_get(f"/corporations/{corp_id}/assets/")
+
+
+async def get_corp_asset_quantities() -> Dict[int, int]:
+    """
+    Return aggregated corp assets as {type_id: total_quantity}.
+    Cached for 5 minutes.
+    """
+    global _asset_cache, _asset_cache_expiry
+    if _asset_cache is not None and time.time() < _asset_cache_expiry:
+        return _asset_cache
+
+    assets = await get_corporation_assets()
+    totals: Dict[int, int] = {}
+    for asset in assets:
+        if not asset.get("is_singleton"):
+            type_id = asset["type_id"]
+            totals[type_id] = totals.get(type_id, 0) + asset.get("quantity", 1)
+
+    _asset_cache = totals
+    _asset_cache_expiry = time.time() + 300
+    return totals
