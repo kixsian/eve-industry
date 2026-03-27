@@ -1,6 +1,7 @@
 """
 Market price service using Fuzzwork aggregates API.
 https://market.fuzzwork.co.uk/api/
+Uses Jita buy (max buy order) as the reference price.
 """
 import httpx
 from typing import Dict, List, Optional
@@ -55,8 +56,8 @@ class MarketService:
 
     async def get_prices(self, type_ids: List[int]) -> Dict[int, float]:
         """
-        Get Jita sell prices for a list of type IDs.
-        Returns dict of {type_id: min_sell_price}.
+        Get Jita buy prices for a list of type IDs.
+        Returns dict of {type_id: max_buy_price}.
         Uses Fuzzwork aggregates API with 30-min cache.
         """
         cached = {}
@@ -77,7 +78,7 @@ class MarketService:
         return {**cached, **fetched}
 
     async def _fetch_fuzzwork_prices(self, type_ids: List[int]) -> Dict[int, float]:
-        """Fetch prices from Fuzzwork in chunks, return {type_id: min_sell_price}."""
+        """Fetch prices from Fuzzwork in chunks, return {type_id: max_buy_price}."""
         result = {}
         client = await self._get_client()
 
@@ -93,8 +94,8 @@ class MarketService:
                 response.raise_for_status()
                 data = response.json()
                 for type_id_str, market in data.items():
-                    sell = market.get("sell", {})
-                    price = sell.get("min")
+                    buy = market.get("buy", {})
+                    price = buy.get("max")
                     if price is not None:
                         try:
                             result[int(type_id_str)] = float(price)
